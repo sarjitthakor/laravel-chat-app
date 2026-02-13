@@ -9,10 +9,11 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libpq-dev
+    libpq-dev \
+    nodejs \
+    npm
 
 # Install PHP extensions
-# RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
 RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
 
 # Install Composer
@@ -24,16 +25,16 @@ WORKDIR /var/www
 # Copy project files
 COPY . .
 
-# Install Laravel dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage
+# Install Node dependencies and build assets
+RUN npm install
+RUN npm run build
 
-# Expose port
+# Set permissions
+RUN chmod -R 775 storage bootstrap/cache
+
 EXPOSE 8000
 
-# Start Laravel server
 CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT}
-
