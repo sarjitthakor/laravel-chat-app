@@ -18,6 +18,9 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/public/css/filament
+/public/js/filament
+/public/fonts/filament
 /vendor
 Homestead.json
 Homestead.yaml
