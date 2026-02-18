@@ -35,6 +35,11 @@
                 <div class="text-sm break-words">
                     {{ $msg->message }}
                 </div>
+                @can('delete', $msg)
+                    <button wire:click="confirmDelete({{ $msg->id }})" class="text-xs text-red-500 mt-1 hover:text-red-700">
+                        🗑 Delete
+                    </button>
+                @endcan
 
                 <div class="text-[11px] text-right mt-1 text-gray-600">
                     {{ $msg->created_at->format('H:i') }}
@@ -86,6 +91,24 @@
             Send
         </button>
 
+    </div>
+
+    <div x-data="{ open:false }" x-on:open-delete-modal.window="open=true" x-show="open"
+        class="fixed inset-0 flex items-center justify-center bg-black/40">
+    
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <p class="mb-4">Delete this message?</p>
+    
+            <div class="flex gap-3 justify-end">
+                <button @click="open=false" class="px-4 py-2 bg-gray-300 rounded">
+                    Cancel
+                </button>
+    
+                <button wire:click="deleteMessage" @click="open=false" class="px-4 py-2 bg-red-500 text-white rounded">
+                    Delete
+                </button>
+            </div>
+        </div>
     </div>
 
 </div>

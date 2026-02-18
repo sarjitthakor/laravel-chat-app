@@ -9,9 +9,15 @@ class ChatRoom extends Component
 {
 
     public $message;
+    public $deleteMessageId = null;
 
     // protected $listeners = ['refreshChat' => '$refresh'];
-    protected $listeners = ['echo:chat,MessageSent' => 'refreshChat'];
+    protected $listeners = ['echo:chat,MessageSent' => 'refreshChat', 'message-deleted' => '$refresh'];
+
+     // ✅ Validation rules
+    protected $rules = [
+        'message' => 'required|string|min:1',
+    ];
 
     public function render()
     {
@@ -22,6 +28,9 @@ class ChatRoom extends Component
 
     public function sendMessage()
     {
+         // ✅ Validate first
+        $this->validate();
+        
         $msg = Message::create([
             'user_id' => auth()->id(),
             'message' => $this->message,
@@ -31,4 +40,35 @@ class ChatRoom extends Component
 
         $this->message = '';
     }
+
+    public function testDelete($messageId)
+    {
+        $message = Message::findOrFail($messageId);
+
+        $this->authorize('delete', $message);
+
+        session()->flash('success', 'Policy Allowed ✅');
+    }
+
+    public function confirmDelete($id)
+    {
+        $this->deleteMessageId = $id;
+
+        $this->dispatch('open-delete-modal');
+    }
+
+    public function deleteMessage()
+    {
+        $message = \App\Models\Message::findOrFail($this->deleteMessageId);
+
+        $this->authorize('delete', $message);
+
+        $message->delete(); // soft delete
+
+        $this->deleteMessageId = null;
+
+        $this->dispatch('message-deleted');
+    }
+
+
 }

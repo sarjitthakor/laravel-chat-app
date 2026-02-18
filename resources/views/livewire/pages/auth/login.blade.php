@@ -20,7 +20,13 @@ new #[Layout('layouts.guest')] class extends Component
 
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        // $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true); // default method for redirecting user after login for livewire
+        $user = auth()->user();
+        if ($user->hasRole('admin')) {
+        $this->redirect('/admin', navigate: true);
+        } else {
+        $this->redirect('/dashboard', navigate: true); // change if your route name differs
+        }
     }
 }; ?>
 

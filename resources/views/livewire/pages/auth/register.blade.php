@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use Spatie\Permission\Models\Role;
 
 new #[Layout('layouts.guest')] class extends Component
 {
@@ -28,7 +29,16 @@ new #[Layout('layouts.guest')] class extends Component
 
         $validated['password'] = Hash::make($validated['password']);
 
-        event(new Registered($user = User::create($validated)));
+        
+        // event(new Registered($user = User::create($validated)));
+        // default method for registering user with event in livewire, but we need to assign role to user after creating it, so we will create user first and then assign role to it and then fire event
+
+        $user = User::create($validated);
+        
+        // ✅ Assign default role
+        $user->assignRole('user');
+
+        event(new Registered($user));
 
         Auth::login($user);
 
